@@ -53,20 +53,21 @@ asyncio.run(main())
 
 ```python
 import asyncio
+# Use the same names as client-valence-anomaly-detection
 from oracle_fusion_mock.sales_orders import (
-    SalesOrderMockClient,
-    SalesOrderMockOperations,
+    OracleFusionClient,   # Alias for SalesOrderMockClient
+    OracleOperations,     # Alias for SalesOrderMockOperations
 )
 
 async def main():
-    # Low-level client (drop-in for OracleFusionClient)
-    async with SalesOrderMockClient() as client:
+    # Low-level client (same interface as real OracleFusionClient)
+    async with OracleFusionClient() as client:
         orders = await client.get_orders({"q": "StatusCode=Booked"})
         order = await client.get_order("100100574829001", include_lines=True)
         print(f"Order: {order['OrderNumber']} - ${order['TotalAmount']}")
 
-    # High-level operations with statistics
-    async with SalesOrderMockOperations() as ops:
+    # High-level operations with statistics (same interface as real OracleOperations)
+    async with OracleOperations() as ops:
         # Get customer order history for anomaly detection
         history = await ops.get_customer_order_history("CUST-1001", months=12)
         print(f"Customer: {history.customer_name}")
@@ -149,27 +150,55 @@ await client.requisitions.return_lines(req_id, line_ids=[1, 2], reason="Incorrec
 
 This module provides 100% compatibility with `client-valence-anomaly-detection/src/oracle/`.
 
-### Compatibility Mapping
+### Drop-in Replacement Usage
 
-| anomaly-detection | oracle-fusion-mock | Description |
-|-------------------|-------------------|-------------|
-| `OracleFusionClient` | `SalesOrderMockClient` | Low-level HTTP client |
-| `OracleOperations` | `SalesOrderMockOperations` | High-level operations |
-| `Order` | `Order` | Sales order model |
-| `OrderLine` | `OrderLine` | Order line item |
-| `Customer` | `Customer` | Customer entity |
-| `Product` | `Product` | Product/inventory item |
-| `CustomerOrderHistory` | `CustomerOrderHistory` | Customer statistics |
-| `ProductOrderHistory` | `ProductOrderHistory` | Product statistics |
-
-### SalesOrderMockClient
-
-Drop-in replacement for `OracleFusionClient`:
+You can import with the **exact same names** as `anomaly-detection` expects:
 
 ```python
-from oracle_fusion_mock.sales_orders import SalesOrderMockClient
+# These imports work exactly like client-valence-anomaly-detection
+from oracle_fusion_mock.sales_orders import (
+    OracleFusionClient,       # Alias for SalesOrderMockClient
+    OracleOperations,         # Alias for SalesOrderMockOperations
+    OracleFusionError,        # Alias for SalesOrderMockError
+    OracleFusionNotFoundError,
+    Order,
+    OrderLine,
+    Customer,
+    Product,
+    CustomerOrderHistory,
+    ProductOrderHistory,
+)
 
-async with SalesOrderMockClient() as client:
+# Same code as production - just change the import!
+async with OracleOperations() as ops:
+    history = await ops.get_customer_order_history("CUST-1001", months=12)
+    print(f"Average: ${history.average_order_amount}")
+    print(f"Std Dev: ${history.std_dev_amount}")
+```
+
+### Compatibility Mapping
+
+| anomaly-detection | oracle-fusion-mock | Alias Available |
+|-------------------|-------------------|-----------------|
+| `OracleFusionClient` | `SalesOrderMockClient` | `OracleFusionClient` |
+| `OracleOperations` | `SalesOrderMockOperations` | `OracleOperations` |
+| `OracleFusionError` | `SalesOrderMockError` | `OracleFusionError` |
+| `OracleFusionNotFoundError` | `SalesOrderMockNotFoundError` | `OracleFusionNotFoundError` |
+| `Order` | `Order` | Same name |
+| `OrderLine` | `OrderLine` | Same name |
+| `Customer` | `Customer` | Same name |
+| `Product` | `Product` | Same name |
+| `CustomerOrderHistory` | `CustomerOrderHistory` | Same name |
+| `ProductOrderHistory` | `ProductOrderHistory` | Same name |
+
+### SalesOrderMockClient (or OracleFusionClient)
+
+Drop-in replacement for the real client:
+
+```python
+from oracle_fusion_mock.sales_orders import OracleFusionClient  # or SalesOrderMockClient
+
+async with OracleFusionClient() as client:
     # Get orders with filtering
     orders = await client.get_orders({"q": "CustomerId=CUST-1001"})
     orders = await client.get_orders({"q": "StatusCode=Booked", "limit": "10"})
@@ -187,14 +216,14 @@ async with SalesOrderMockClient() as client:
     is_healthy = await client.health_check()  # Always True for mock
 ```
 
-### SalesOrderMockOperations
+### SalesOrderMockOperations (or OracleOperations)
 
 Drop-in replacement for `OracleOperations` with statistical calculations:
 
 ```python
-from oracle_fusion_mock.sales_orders import SalesOrderMockOperations, OrderSearchCriteria
+from oracle_fusion_mock.sales_orders import OracleOperations, OrderSearchCriteria  # or SalesOrderMockOperations
 
-async with SalesOrderMockOperations() as ops:
+async with OracleOperations() as ops:
     # Get orders
     order = await ops.get_order("100100574829001")
     order = await ops.get_order_by_number("SO-2025-0001")
@@ -226,11 +255,11 @@ async with SalesOrderMockOperations() as ops:
 ### Anomaly Detection Example
 
 ```python
-from oracle_fusion_mock.sales_orders import SalesOrderMockOperations
+from oracle_fusion_mock.sales_orders import OracleOperations  # Compatible name
 
 async def check_order_anomaly(order_id: str) -> bool:
     """Check if an order amount is anomalous."""
-    async with SalesOrderMockOperations() as ops:
+    async with OracleOperations() as ops:
         order = await ops.get_order(order_id)
         history = await ops.get_customer_order_history(order.customer_id, months=12)
 

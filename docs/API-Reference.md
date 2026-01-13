@@ -13,8 +13,9 @@ Complete API reference for the Oracle Fusion Mock Client library.
   - [AgreementService](#agreementservice)
   - [AcknowledgmentService](#acknowledgmentservice)
 - [Module: Sales Orders](#module-sales-orders)
-  - [SalesOrderMockClient](#salesordermockclient)
-  - [SalesOrderMockOperations](#salesordermockoperations)
+  - [Compatibility Aliases](#compatibility-aliases)
+  - [SalesOrderMockClient (alias: OracleFusionClient)](#salesordermockclient-alias-oraclefusionclient)
+  - [SalesOrderMockOperations (alias: OracleOperations)](#salesordermockoperations-alias-oracleoperations)
   - [Models](#sales-order-models)
 - [Common Types](#common-types)
 
@@ -484,11 +485,34 @@ async def get_pending_acknowledgments() -> OracleCollectionResponse[POAcknowledg
 
 Compatible with `client-valence-anomaly-detection/src/oracle/`
 
-### SalesOrderMockClient
+### Compatibility Aliases
+
+For drop-in replacement with anomaly-detection, use the **same class names**:
+
+```python
+# Use the same names as the real Oracle client
+from oracle_fusion_mock.sales_orders import (
+    OracleFusionClient,       # Alias for SalesOrderMockClient
+    OracleOperations,         # Alias for SalesOrderMockOperations
+    OracleFusionError,        # Alias for SalesOrderMockError
+    OracleFusionNotFoundError,# Alias for SalesOrderMockNotFoundError
+)
+
+# Your production code works unchanged!
+async with OracleFusionClient() as client:
+    orders = await client.get_orders()
+
+async with OracleOperations() as ops:
+    history = await ops.get_customer_order_history("CUST-1001")
+```
+
+### SalesOrderMockClient (alias: OracleFusionClient)
 
 Drop-in replacement for `OracleFusionClient` from anomaly-detection.
 
 ```python
+from oracle_fusion_mock.sales_orders import OracleFusionClient  # Recommended
+# or
 from oracle_fusion_mock.sales_orders import SalesOrderMockClient
 ```
 
@@ -628,11 +652,13 @@ async def delete(resource: str, resource_id: str) -> dict
 
 ---
 
-### SalesOrderMockOperations
+### SalesOrderMockOperations (alias: OracleOperations)
 
 Drop-in replacement for `OracleOperations` with statistical calculations.
 
 ```python
+from oracle_fusion_mock.sales_orders import OracleOperations  # Recommended
+# or
 from oracle_fusion_mock.sales_orders import SalesOrderMockOperations
 ```
 
@@ -963,23 +989,34 @@ class OracleActionResponse:
 ### Exceptions
 
 ```python
+# Procurement exceptions
 class MockNotFoundError(Exception):
     """Resource not found."""
     status_code: int = 404
     response: Any
 
-class SalesOrderMockError(Exception):
+# Sales Orders exceptions (with compatibility aliases)
+class SalesOrderMockError(Exception):       # alias: OracleFusionError
     """Base exception for Sales Order mock."""
     status_code: int | None
     response: Any
 
-class SalesOrderMockNotFoundError(SalesOrderMockError):
+class SalesOrderMockNotFoundError(SalesOrderMockError):  # alias: OracleFusionNotFoundError
     """Sales order resource not found."""
     pass
 
-class SalesOrderMockAuthError(SalesOrderMockError):
+class SalesOrderMockAuthError(SalesOrderMockError):      # alias: OracleFusionAuthError
     """Mock authentication error (for compatibility)."""
     pass
+```
+
+**Compatibility imports:**
+```python
+from oracle_fusion_mock.sales_orders import (
+    OracleFusionError,           # = SalesOrderMockError
+    OracleFusionNotFoundError,   # = SalesOrderMockNotFoundError
+    OracleFusionAuthError,       # = SalesOrderMockAuthError
+)
 ```
 
 ---
