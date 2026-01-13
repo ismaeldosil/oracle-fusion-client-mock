@@ -405,13 +405,21 @@ oracle-fusion-client-mock/
 └── pyproject.toml
 ```
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [API Reference](docs/API-Reference.md) | Complete API documentation with exact compatibility mapping |
+| [JSON Examples - Procurement](docs/JSON-Examples-Procurement.md) | Sample JSON responses for Procurement APIs |
+| [JSON Examples - Sales Orders](docs/JSON-Examples-SalesOrders.md) | Sample JSON responses for Sales Orders APIs |
+
 ## Related Projects
 
 | Project | Description |
 |---------|-------------|
-| `oracle-fusion-client` | Real Oracle Fusion Procurement client |
+| [`oracle-fusion-python-client`](https://github.com/REEA-Global-LLC/oracle-fusion-python-client) | Real Oracle Fusion Python client |
 | `oracle-fusion-mock-server` | Node.js JSON server for HTTP mocking |
-| `client-valence-anomaly-detection` | Anomaly detection system using Sales Orders |
+| [`client-valence-anomaly-detection`](https://github.com/REEA-Global-LLC/client-valence-anomaly-detection) | Anomaly detection system using Sales Orders |
 
 ## License
 
